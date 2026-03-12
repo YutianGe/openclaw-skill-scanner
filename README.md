@@ -420,9 +420,6 @@ A: 启发式检测可以自动识别：
 
 无需手动添加规则，系统会自动识别这些模式。
 
-### Q: 可以扫描其他项目吗？
-A: 可以。虽然针对 OpenClaw Skills 优化，但也可用于扫描其他 Node.js 项目。
-
 ## 📦 打包与分发
 
 ### 打包成 EXE
@@ -448,19 +445,6 @@ npm run build:all
 ### 分发说明
 
 打包后的 EXE 文件可以直接分发给用户，无需安装 Node.js 环境。用户只需双击运行即可。
-
-## 🤝 贡献指南
-
-欢迎提交 Issue 和 Pull Request！
-
-## 📄 License
-
-MIT License
-
-## 🔗 Links
-
-- [Gitee Repository](https://gitee.com/YuTianGe/openclaw-skill-scanner)
-- [Issue Tracker](https://gitee.com/YuTianGe/openclaw-skill-scanner/issues)
 - [OpenClaw Project](https://github.com/openclaw)
 
 ---
