@@ -420,9 +420,6 @@ A: Heuristic detection can automatically identify:
 
 No manual rule addition needed, system automatically identifies these patterns.
 
-### Q: Can it scan other projects?
-A: Yes. Although optimized for OpenClaw Skills, it can also scan other Node.js projects.
-
 ## 📦 Packaging & Distribution
 
 ### Package as EXE
@@ -448,21 +445,3 @@ For detailed packaging instructions, see [BUILD.md](./BUILD.md)
 ### Distribution Notes
 
 The packaged EXE file can be distributed directly to users without requiring Node.js installation. Users just need to double-click to run.
-
-## 🤝 Contributing
-
-Issues and Pull Requests are welcome!
-
-## 📄 License
-
-MIT License
-
-## 🔗 Links
-
-- [Gitee Repository](https://gitee.com/YuTianGe/openclaw-skill-scanner)
-- [Issue Tracker](https://gitee.com/YuTianGe/openclaw-skill-scanner/issues)
-- [OpenClaw Project](https://github.com/openclaw)
-
----
-
-**Made with ❤️ for OpenClaw Community**
