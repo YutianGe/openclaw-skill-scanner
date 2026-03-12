@@ -1,0 +1,59 @@
+{
+  "name": "openclaw-skill-scanner",
+  "version": "1.0.0",
+  "description": "An intelligent security scanner for OpenClaw Skills to detect potential malicious code and security risks",
+  "type": "module",
+  "bin": {
+    "claw-skill-scan": "./bin/claw-skill-scan.js",
+    "claw-skill-scan-tui": "./bin/claw-skill-scan-tui.js"
+  },
+  "main": "index.js",
+  "scripts": {
+    "web": "node server.js",
+    "start": "node launcher.js",
+    "build": "pkg launcher.js --targets node18-win-x64 --output dist/OpenClawSkillScanner.exe",
+    "build:all": "pkg launcher.js --targets node18-win-x64,node18-macos-x64,node18-linux-x64 --output dist/OpenClawSkillScanner",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "pkg": {
+    "assets": [
+      "web/**/*",
+      "src/**/*",
+      "rules.config.yml"
+    ],
+    "outputPath": "dist"
+  },
+  "keywords": [
+    "openclaw",
+    "security",
+    "scanner",
+    "malware-detection",
+    "code-analysis",
+    "skill-scanner",
+    "security-audit"
+  ],
+  "author": "OpenClaw Community",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://gitee.com/YuTianGe/openclaw-skill-scanner.git"
+  },
+  "bugs": {
+    "url": "https://gitee.com/YuTianGe/openclaw-skill-scanner/issues"
+  },
+  "homepage": "https://gitee.com/YuTianGe/openclaw-skill-scanner",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "commander": "^14.0.3",
+    "glob": "^13.0.6",
+    "ink": "^6.8.0",
+    "react": "^19.2.4",
+    "yaml": "^2.8.2"
+  },
+  "devDependencies": {
+    "pkg": "^5.8.1"
+  }
+}

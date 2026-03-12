@@ -1,0 +1,92 @@
+# 是否启用 LLM 语义分析（使用 Ollama 本地模型）
+# 安装 Ollama: https://ollama.ai
+# 运行模型: ollama run llama3.2
+enable_llm_analysis: true
+
+# LLM 分析的置信度阈值（0-1，低于此值才使用 LLM）
+# 提高阈值可以减少 LLM 调用次数，加快扫描速度
+llm_confidence_threshold: 0.85
+
+# LLM 最大输出长度（token 数量）
+# 默认 2048，你可以设置成 1000000 让模型完整输出
+# 注意：越大越慢，但输出更完整
+llm_max_tokens: 1000000
+
+whitelist_domains:
+  # Anthropic/Claude 官方域名
+  - anthropic.com
+  - api.anthropic.com
+  - console.anthropic.com
+  - claude.ai
+  - www.anthropic.com
+
+  # GitHub（代码托管和 API）
+  - github.com
+  - api.github.com
+  - raw.githubusercontent.com
+  - gist.github.com
+
+  # NPM 包管理
+  - npmjs.com
+  - registry.npmjs.org
+
+  # 常用开发文档
+  - nodejs.org
+  - developer.mozilla.org
+  - stackoverflow.com
+
+  # Python 包管理
+  - pypi.org
+  - files.pythonhosted.org
+rules:
+  - id: dangerous_command_rm_rf
+    severity: high
+    description: 使用 rm -rf，可能导致不可逆文件删除
+    remediation: 避免直接使用 rm -rf，优先改用 trash/回收站机制或增加交互式确认，并限制作用路径。
+    fileGlobs:
+      - "**/*.js"
+      - "**/*.ts"
+      - "**/*.py"
+      - "**/*.sh"
+    pattern: rm\s+-rf\s+
+  - id: access_sensitive_ssh_keys
+    severity: high
+    description: 访问 ~/.ssh 或私钥文件，可能泄露敏感凭证
+    remediation: 仅在必要的安全审计场景访问 ~/.ssh，且需在文档中明确说明用途；避免在普通业务 skill 中读取 SSH 私钥。
+    fileGlobs:
+      - "**/*"
+    pattern: (\.ssh/id_rsa|\.ssh/id_ed25519|~/.ssh)
+  - id: external_http_request
+    severity: medium
+    description: 访问外部 HTTP/HTTPS URL，需确认是否合理（可能外传数据）
+    remediation: 确认外部域名可信，并在 rules.config.yml 的 whitelist_domains 中显式列出；避免向个人服务器或未知域名上传敏感数据。
+    fileGlobs:
+      - "**/*.js"
+      - "**/*.ts"
+      - "**/*.py"
+      - "**/*.sh"
+      - "**/*.md"
+      - "**/*.d.ts"
+    pattern: https?://[^\s'"]+
+  - id: prompt_injection_phrases
+    severity: medium
+    description: 出现可疑提示词注入短语，需要人工确认
+    remediation: 在 Skill 说明中清楚区分"示例攻击 Payload"和实际逻辑，并在实现中对用户输入做严格过滤，不直接执行包含这类短语的指令。
+    fileGlobs:
+      - "**/*.md"
+      - "**/*.txt"
+      - "**/*.js"
+      - "**/*.ts"
+      - "**/*.py"
+    pattern: (ignore previous instructions|忽略之前的指令|忽略上述|忽略以上|bypass.*system|绕过.*系统|绕过.*提示|绕过.*警告|system prompt|系统提示|输出你的系统提示|reveal.*prompt|泄露.*提示|泄露所有|删除所有|delete all|删除.*本地文件|删除.*电脑|你可以删除|可以删除.*文件|发我|发给我|发送.*私钥|发送.*密码|发送.*token|发送.*key|上传.*私钥|传给我|把.*发给|发到邮箱|发送到邮箱|发送至邮箱|项目.*发到|文件.*发到|代码.*发到|数据.*发到|send.*to.*email|send.*to.*mail|你的密码|输入密码|提供密码|告诉我.*密码|密码是多少|密码是什么|what is your password|give me.*password|send me.*key|exfiltrate|data extraction)
+  - id: hardcoded_secrets_like_tokens
+    severity: medium
+    description: 疑似硬编码密钥/Token，请检查
+    remediation: 不要在代码或 SKILL.md 中硬编码真实密钥；改用环境变量或 OpenClaw 的 secrets 管理，并尽快轮换已暴露的 key。
+    fileGlobs:
+      - "**/*.js"
+      - "**/*.ts"
+      - "**/*.py"
+      - "**/*.sh"
+      - "**/*.md"
+    pattern: (sk-[A-Za-z0-9]{16,}|ghp_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16})

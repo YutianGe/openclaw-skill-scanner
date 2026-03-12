@@ -1,0 +1,1657 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OpenClaw Skill 安全面板</title>
+  <style>
+    :root {
+      --bg: #0b1120;
+      --bg-elevated: #111827;
+      --border-subtle: #1f2937;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --accent: #3b82f6;
+      --danger: #f97373;
+      --warning: #facc15;
+      --success: #4ade80;
+      --card-radius: 10px;
+      --shadow-soft: 0 10px 25px rgba(0,0,0,0.4);
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+    [data-theme="light"] {
+      --bg: #f3f4f6;
+      --bg-elevated: #ffffff;
+      --border-subtle: #e5e7eb;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --accent: #2563eb;
+      --danger: #b91c1c;
+      --warning: #d97706;
+      --success: #15803d;
+      --card-radius: 10px;
+      --shadow-soft: 0 10px 25px rgba(15,23,42,0.08);
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    .shell {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px 20px 40px;
+    }
+    .shell-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .title-block h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .title-block h1 span.logo-dot {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background-color: var(--accent);
+      box-shadow: 0 0 12px var(--accent);
+    }
+    .title-block .subtitle {
+      margin-top: 8px;
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .btn-primary {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      background: linear-gradient(135deg, var(--accent) 0%, #2563eb 100%);
+      color: #fff;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      transition: all 0.2s ease;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+    }
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+    .btn-icon {
+      font-size: 16px;
+    }
+    .theme-toggle {
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+      background-color: var(--bg-elevated);
+      padding: 8px 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    .theme-toggle:hover {
+      border-color: var(--accent);
+      background-color: var(--border-subtle);
+    }
+
+    .status-line {
+      margin-bottom: 24px;
+      padding: 12px 16px;
+      background-color: var(--bg-elevated);
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+      font-size: 13px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .status-line::before {
+      content: "●";
+      color: var(--accent);
+      font-size: 16px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .status-line span.status {
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 1024px) {
+      .layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .card {
+      background-color: var(--bg-elevated);
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-soft);
+      padding: 20px;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      height: 600px;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-shrink: 0;
+    }
+    .card-header h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text-main);
+    }
+
+    .card-content {
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+    }
+    .card-content::-webkit-scrollbar {
+      width: 8px;
+    }
+    .card-content::-webkit-scrollbar-track {
+      background: var(--bg);
+      border-radius: 4px;
+    }
+    .card-content::-webkit-scrollbar-thumb {
+      background: var(--border-subtle);
+      border-radius: 4px;
+    }
+    .card-content::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+
+    .stat {
+      border-radius: 12px;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--bg-elevated) 0%, var(--border-subtle) 100%);
+      border: 1px solid var(--border-subtle);
+      transition: all 0.2s ease;
+    }
+    .stat:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .stat-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding: 12px;
+      background-color: var(--bg);
+      border-radius: 10px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .filter-left { display: flex; align-items: center; gap: 16px; }
+    .filter-right { display: flex; align-items: center; gap: 12px; }
+
+    .checkbox-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: background-color 0.2s ease;
+    }
+    .checkbox-inline:hover {
+      background-color: var(--border-subtle);
+    }
+    .checkbox-inline input {
+      margin: 0;
+      cursor: pointer;
+      width: 16px;
+      height: 16px;
+    }
+
+    select.sort-select {
+      background-color: var(--bg-elevated);
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      padding: 6px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: border-color 0.2s ease;
+    }
+    select.sort-select:hover {
+      border-color: var(--accent);
+    }
+    select.sort-select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    table.skill-table {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: 100%;
+      font-size: 14px;
+      background-color: transparent;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    table.skill-table thead {
+      background-color: var(--bg);
+    }
+    table.skill-table th,
+    table.skill-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      text-align: left;
+    }
+    table.skill-table th {
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    table.skill-table tbody tr {
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    table.skill-table tbody tr:hover {
+      background-color: var(--border-subtle);
+    }
+    table.skill-table tbody tr.selected {
+      background-color: rgba(59, 130, 246, 0.1);
+      border-left: 3px solid var(--accent);
+    }
+
+    .risk-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      margin-right: 6px;
+    }
+    .risk-dot.high {
+      background-color: var(--danger);
+      box-shadow: 0 0 8px var(--danger);
+    }
+    .risk-dot.medium {
+      background-color: var(--warning);
+      box-shadow: 0 0 8px var(--warning);
+    }
+
+    .btn-ghost {
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+      background-color: transparent;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-main);
+      cursor: pointer;
+      margin-right: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn-ghost:hover {
+      transform: translateY(-1px);
+    }
+    .btn-ghost.danger {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+    .btn-ghost.danger:hover {
+      background-color: var(--danger);
+      color: white;
+    }
+    .btn-ghost.warn {
+      border-color: var(--warning);
+      color: var(--warning);
+    }
+    .btn-ghost.warn:hover {
+      background-color: var(--warning);
+      color: white;
+    }
+
+    .details-empty {
+      font-size: 14px;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    /* 代码查看器弹窗 */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-content {
+      background-color: var(--bg-elevated);
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+      width: 95%;
+      max-width: 1400px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+    /* 代码查看器弹窗 - 更宽 */
+    #codeModal .modal-content {
+      width: 95%;
+      max-width: 1600px;
+    }
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-main);
+      font-family: var(--font-mono);
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+    .modal-close:hover {
+      background-color: var(--border-subtle);
+      color: var(--text-main);
+    }
+    .modal-body {
+      flex: 1;
+      overflow: auto;
+      padding: 0;
+    }
+    .code-viewer {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.6;
+      background-color: #020617;
+      color: #e5e7eb;
+    }
+    .code-line {
+      display: flex;
+      padding: 0 24px;
+      min-height: 21px;
+    }
+    .code-line:hover {
+      background-color: rgba(59, 130, 246, 0.1);
+    }
+    .code-line.highlight {
+      background-color: rgba(250, 204, 21, 0.2);
+      border-left: 3px solid var(--warning);
+    }
+    .line-number {
+      width: 60px;
+      text-align: right;
+      color: #6b7280;
+      user-select: none;
+      padding-right: 16px;
+      flex-shrink: 0;
+    }
+    .line-content {
+      flex: 1;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-high {
+      background-color: rgba(185, 28, 28, 0.1);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+    }
+    .badge-medium {
+      background-color: rgba(217, 119, 6, 0.1);
+      color: var(--warning);
+      border: 1px solid var(--warning);
+    }
+    .badge-clean {
+      background-color: rgba(21, 128, 61, 0.1);
+      color: var(--success);
+      border: 1px solid var(--success);
+    }
+
+    .section-title {
+      margin: 20px 0 12px;
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .finding {
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+      padding: 16px;
+      margin-bottom: 12px;
+      background-color: var(--bg);
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .finding:hover {
+      border-color: var(--accent);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transform: translateX(2px);
+    }
+    .finding-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .finding-title {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .finding-why {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+    .finding-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      font-family: var(--font-mono);
+    }
+    .code-snippet {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      background-color: #020617;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      padding: 12px;
+      white-space: pre-wrap;
+      max-height: 150px;
+      overflow: auto;
+      line-height: 1.5;
+    }
+    [data-theme="light"] .code-snippet {
+      background-color: #f3f4f6;
+      color: #111827;
+    }
+    .remediation {
+      font-size: 14px;
+      color: var(--accent);
+      margin-top: 8px;
+      padding: 8px 12px;
+      background-color: rgba(59, 130, 246, 0.1);
+      border-radius: 6px;
+      line-height: 1.5;
+    }
+
+    /* 模态框样式 */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      animation: fadeIn 0.2s ease;
+    }
+    .modal-overlay.show {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    /* Ollama 安装模态框样式 */
+    #ollamaInstallModal .modal-content {
+      background-color: var(--bg-elevated);
+      border-radius: 16px;
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      max-width: 500px;
+      width: 90%;
+      animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .modal-header {
+      padding: 24px 24px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .modal-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .modal-body {
+      padding: 24px;
+    }
+    .modal-text {
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text-main);
+      margin-bottom: 20px;
+    }
+    .modal-steps {
+      background-color: var(--bg);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .modal-step {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text-main);
+    }
+    .modal-step:last-child {
+      margin-bottom: 0;
+    }
+    .modal-step-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent) 0%, #2563eb 100%);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .modal-footer {
+      padding: 16px 24px 24px;
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+    .modal-btn {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .modal-btn-primary {
+      background: linear-gradient(135deg, var(--accent) 0%, #2563eb 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    .modal-btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+    }
+    .modal-btn-secondary {
+      background-color: var(--bg);
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+    }
+    .modal-btn-secondary:hover {
+      background-color: var(--border-subtle);
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="shell-header">
+      <div class="title-block">
+        <h1><span class="logo-dot"></span>OpenClaw Skill 安全面板</h1>
+        <div class="subtitle">扫描本机已安装 Skills，识别高危行为并给出修复建议。</div>
+      </div>
+      <div class="top-actions">
+        <button class="btn-primary" id="scanBtn">
+          <span class="btn-icon">🛡️</span>
+          <span>扫描 Skills</span>
+        </button>
+        <button class="theme-toggle" id="themeToggle">
+          <span id="themeIcon">🌙</span>
+          <span id="themeLabel">暗色</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="status-line">
+      <span class="status" id="status">空闲，点击"扫描 Skills"开始检测</span>
+    </div>
+
+    <!-- Ollama 状态卡片 -->
+    <div class="card" style="margin-bottom: 24px; height: auto;">
+      <div class="card-header">
+        <h2>🤖 Ollama LLM 增强</h2>
+        <div id="ollamaStatusIndicator" style="display: flex; align-items: center; gap: 8px;">
+          <div id="ollamaLight" style="width: 12px; height: 12px; border-radius: 50%; background-color: #6b7280; box-shadow: 0 0 8px rgba(107, 116, 128, 0.5);"></div>
+          <span id="ollamaStatusText" style="font-size: 13px; color: var(--text-muted);">检测中...</span>
+        </div>
+      </div>
+      <div style="padding: 16px 0;">
+        <div style="margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <span style="font-size: 13px; color: var(--text-muted);">状态</span>
+            <span id="ollamaDetailStatus" style="font-size: 13px; font-weight: 600;">未知</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <span style="font-size: 13px; color: var(--text-muted);">模型</span>
+            <span id="ollamaModel" style="font-size: 13px; font-family: var(--font-mono);">llama3.2:3b</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="font-size: 13px; color: var(--text-muted);">准确率提升</span>
+            <span style="font-size: 13px; font-weight: 600; color: var(--success);">+10-15%</span>
+          </div>
+        </div>
+
+        <div id="ollamaActions" style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button id="btnInstallOllama" class="btn-primary" style="display: none;">
+            <span class="btn-icon">📥</span>
+            安装 Ollama
+          </button>
+          <button id="btnStartOllama" class="btn-primary" style="display: none;">
+            <span class="btn-icon">▶️</span>
+            启动 Ollama
+          </button>
+          <button id="btnStopOllama" class="btn-primary" style="display: none; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+            <span class="btn-icon">⏹️</span>
+            停止 Ollama
+          </button>
+          <button id="btnDownloadModel" class="btn-primary" style="display: none;">
+            <span class="btn-icon">⬇️</span>
+            下载模型
+          </button>
+        </div>
+
+        <div id="ollamaMessage" style="margin-top: 12px; padding: 12px; border-radius: 8px; font-size: 13px; display: none;"></div>
+      </div>
+    </div>
+
+    <!-- 扫描进度条 -->
+    <div id="progressContainer" style="display: none; margin-bottom: 20px;">
+      <div style="background-color: var(--bg-elevated); border-radius: 8px; padding: 16px; border: 1px solid var(--border-subtle);">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+          <span style="font-size: 13px; color: var(--text-muted);">扫描进度</span>
+          <span style="font-size: 13px; font-weight: 600; color: var(--accent);" id="progressText">0%</span>
+        </div>
+        <div style="background-color: var(--bg); border-radius: 6px; height: 8px; overflow: hidden;">
+          <div id="progressBar" style="background: linear-gradient(90deg, var(--accent), #2563eb); height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+        </div>
+        <div style="margin-top: 8px; font-size: 12px; color: var(--text-muted);" id="progressDetail">准备扫描...</div>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-label">总 Skills</div>
+        <div class="stat-value" id="totalSkills">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">高危</div>
+        <div class="stat-value" style="color: var(--danger);" id="highRiskCount">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">中危</div>
+        <div class="stat-value" style="color: var(--warning);" id="mediumRiskCount">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">安全</div>
+        <div class="stat-value" style="color: var(--success);" id="safeCount">0</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 24px; height: auto;">
+      <div class="card-header">
+        <h2>白名单域名管理</h2>
+      </div>
+      <div style="margin-bottom: 16px;">
+        <p style="font-size: 13px; color: var(--text-muted); margin: 0 0 12px 0;">
+          白名单中的域名不会被标记为中危。已预配置常用官方域名（Anthropic、GitHub、NPM 等）。
+        </p>
+        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+          <input
+            type="text"
+            id="newDomainInput"
+            placeholder="输入域名，如 example.com"
+            style="flex: 1; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-subtle); background-color: var(--bg); color: var(--text-main); font-size: 13px;"
+          />
+          <button class="btn-primary" onclick="addDomain()" style="padding: 8px 16px;">
+            <span>添加</span>
+          </button>
+        </div>
+      </div>
+      <div id="whitelistContainer" style="display: flex; flex-wrap: wrap; gap: 8px; max-height: 380px; overflow-y: auto; padding: 4px;">
+        <span style="font-size: 13px; color: var(--text-muted);">加载中...</span>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div class="card">
+        <div class="card-header">
+          <h2>Skills 列表</h2>
+        </div>
+        <div class="card-content">
+          <div class="filter-bar">
+            <div class="filter-left">
+              <label class="checkbox-inline">
+                <input type="checkbox" id="filterHigh" checked />
+                <span>显示高危</span>
+              </label>
+              <label class="checkbox-inline">
+                <input type="checkbox" id="filterMedium" checked />
+                <span>显示中危</span>
+              </label>
+              <label class="checkbox-inline">
+                <input type="checkbox" id="filterSafe" checked />
+                <span>显示安全</span>
+              </label>
+            </div>
+            <div class="filter-right">
+              <select class="sort-select" id="sortSelect">
+                <option value="risk">按风险排序</option>
+                <option value="name">按名称排序</option>
+              </select>
+            </div>
+          </div>
+          <div style="overflow-x: auto;">
+            <table class="skill-table">
+              <thead>
+                <tr>
+                  <th>Skill 名称</th>
+                  <th>高危</th>
+                  <th>中危</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="skillTableBody">
+                <tr>
+                  <td colspan="4" style="text-align: center; color: var(--text-muted);">暂无数据，请先扫描</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>详细信息</h2>
+        </div>
+        <div class="card-content" id="detailsContent">
+          <div class="details-empty">
+            点击左侧 Skill 查看详细风险信息
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let scanData = null;
+    let selectedSkill = null;
+    let showAllMedium = false;
+    let whitelistDomains = [];
+
+    // 全局函数 - 供 HTML onclick 调用
+    function showOllamaInstallModal() {
+      const modal = document.getElementById('ollamaInstallModal');
+      modal.classList.add('show');
+    }
+    window.showOllamaInstallModal = showOllamaInstallModal;
+
+    function closeOllamaInstallModal() {
+      const modal = document.getElementById('ollamaInstallModal');
+      modal.classList.remove('show');
+    }
+    window.closeOllamaInstallModal = closeOllamaInstallModal;
+
+    function openOllamaDownload() {
+      window.open('https://ollama.ai/download', '_blank');
+      closeOllamaInstallModal();
+      showOllamaMessage('请下载并安装 Ollama，完成后刷新页面', 'info');
+    }
+    window.openOllamaDownload = openOllamaDownload;
+
+    // 等待 DOM 加载完成
+    document.addEventListener('DOMContentLoaded', () => {
+      // 主题切换功能
+      const themeToggle = document.getElementById('themeToggle');
+      const themeIcon = document.getElementById('themeIcon');
+      const themeLabel = document.getElementById('themeLabel');
+      const html = document.documentElement;
+
+      // 从 localStorage 读取保存的主题
+      const savedTheme = localStorage.getItem('theme') || 'dark';
+      html.setAttribute('data-theme', savedTheme);
+      updateThemeButton(savedTheme);
+
+      themeToggle.addEventListener('click', () => {
+        const currentTheme = html.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeButton(newTheme);
+      });
+
+    function updateThemeButton(theme) {
+      if (theme === 'dark') {
+        themeIcon.textContent = '🌙';
+        themeLabel.textContent = '暗色';
+      } else {
+        themeIcon.textContent = '☀️';
+        themeLabel.textContent = '亮色';
+      }
+    }
+
+    // 白名单管理功能
+    async function loadWhitelist() {
+      try {
+        const res = await fetch('/api/whitelist');
+        const data = await res.json();
+        if (data.ok) {
+          whitelistDomains = data.domains;
+          renderWhitelist();
+        }
+      } catch (err) {
+        console.error('加载白名单失败:', err);
+      }
+    }
+
+    function renderWhitelist() {
+      const container = document.getElementById('whitelistContainer');
+      if (whitelistDomains.length === 0) {
+        container.innerHTML = '<span style="font-size: 13px; color: var(--text-muted);">暂无白名单域名</span>';
+        return;
+      }
+      container.innerHTML = whitelistDomains.map(domain => `
+        <div style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background-color: var(--bg); border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 13px;">
+          <span>${domain}</span>
+          <button onclick="removeDomain('${domain}')" style="border: none; background: none; color: var(--danger); cursor: pointer; padding: 0; font-size: 16px; line-height: 1;">×</button>
+        </div>
+      `).join('');
+    }
+
+    async function addDomain() {
+      const input = document.getElementById('newDomainInput');
+      const domain = input.value.trim();
+      if (!domain) {
+        alert('请输入域名');
+        return;
+      }
+      try {
+        const res = await fetch('/api/whitelist/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ domain })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          whitelistDomains = data.domains;
+          renderWhitelist();
+          input.value = '';
+        } else {
+          alert('添加失败: ' + data.error);
+        }
+      } catch (err) {
+        alert('添加失败: ' + err.message);
+      }
+    }
+
+    async function removeDomain(domain) {
+      if (!confirm(`确定要移除域名 "${domain}" 吗？`)) return;
+      try {
+        const res = await fetch('/api/whitelist/remove', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ domain })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          whitelistDomains = data.domains;
+          renderWhitelist();
+        } else {
+          alert('移除失败: ' + data.error);
+        }
+      } catch (err) {
+        alert('移除失败: ' + err.message);
+      }
+    }
+
+    // 页面加载时加载白名单
+    loadWhitelist();
+
+    // Ollama 状态管理
+    let ollamaStatus = null;
+
+    async function checkOllamaStatus() {
+      try {
+        const res = await fetch('/api/ollama/status');
+        const data = await res.json();
+        ollamaStatus = data;
+        updateOllamaUI(data);
+      } catch (err) {
+        console.error('检查 Ollama 状态失败:', err);
+        updateOllamaUI({ ok: false, status: 'error', installed: false, running: false });
+      }
+    }
+
+    function updateOllamaUI(data) {
+      const light = document.getElementById('ollamaLight');
+      const statusText = document.getElementById('ollamaStatusText');
+      const detailStatus = document.getElementById('ollamaDetailStatus');
+      const btnInstall = document.getElementById('btnInstallOllama');
+      const btnStart = document.getElementById('btnStartOllama');
+      const btnStop = document.getElementById('btnStopOllama');
+      const btnDownload = document.getElementById('btnDownloadModel');
+
+      // 隐藏所有按钮
+      btnInstall.style.display = 'none';
+      btnStart.style.display = 'none';
+      btnStop.style.display = 'none';
+      btnDownload.style.display = 'none';
+
+      if (data.running) {
+        // 运行中 - 绿灯
+        light.style.backgroundColor = '#4ade80';
+        light.style.boxShadow = '0 0 12px rgba(74, 222, 128, 0.8)';
+        statusText.textContent = '运行中';
+        statusText.style.color = 'var(--success)';
+        detailStatus.textContent = '✅ 已启用 LLM 增强';
+        detailStatus.style.color = 'var(--success)';
+        btnStop.style.display = 'inline-flex';
+      } else if (data.installed) {
+        // 已安装但未运行 - 黄灯
+        light.style.backgroundColor = '#facc15';
+        light.style.boxShadow = '0 0 12px rgba(250, 204, 21, 0.8)';
+        statusText.textContent = '已停止';
+        statusText.style.color = 'var(--warning)';
+        detailStatus.textContent = '⚠️ 已安装，未启动';
+        detailStatus.style.color = 'var(--warning)';
+        btnStart.style.display = 'inline-flex';
+        if (!data.modelDownloaded) {
+          btnDownload.style.display = 'inline-flex';
+        }
+      } else {
+        // 未安装 - 红灯
+        light.style.backgroundColor = '#f97373';
+        light.style.boxShadow = '0 0 12px rgba(249, 115, 115, 0.8)';
+        statusText.textContent = '未安装';
+        statusText.style.color = 'var(--danger)';
+        detailStatus.textContent = '❌ 未安装 Ollama';
+        detailStatus.style.color = 'var(--danger)';
+        btnInstall.style.display = 'inline-flex';
+      }
+    }
+
+    function showOllamaMessage(message, type = 'info') {
+      const msgEl = document.getElementById('ollamaMessage');
+      msgEl.style.display = 'block';
+      msgEl.textContent = message;
+
+      if (type === 'success') {
+        msgEl.style.backgroundColor = 'rgba(74, 222, 128, 0.1)';
+        msgEl.style.border = '1px solid rgba(74, 222, 128, 0.3)';
+        msgEl.style.color = 'var(--success)';
+      } else if (type === 'error') {
+        msgEl.style.backgroundColor = 'rgba(249, 115, 115, 0.1)';
+        msgEl.style.border = '1px solid rgba(249, 115, 115, 0.3)';
+        msgEl.style.color = 'var(--danger)';
+      } else {
+        msgEl.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+        msgEl.style.border = '1px solid rgba(59, 130, 246, 0.3)';
+        msgEl.style.color = 'var(--accent)';
+      }
+
+      setTimeout(() => {
+        msgEl.style.display = 'none';
+      }, 5000);
+    }
+
+    // 安装 Ollama
+    document.getElementById('btnInstallOllama').addEventListener('click', async () => {
+      showOllamaMessage('正在检查安装选项...', 'info');
+      try {
+        const res = await fetch('/api/ollama/install', { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+          showOllamaMessage(data.message, 'success');
+          setTimeout(() => checkOllamaStatus(), 2000);
+        } else if (data.needsManualInstall) {
+          // Windows 需要手动安装 - 显示自定义模态框
+          showOllamaInstallModal();
+        } else {
+          showOllamaMessage('安装失败: ' + (data.message || data.error), 'error');
+        }
+      } catch (err) {
+        showOllamaMessage('安装失败: ' + err.message, 'error');
+      }
+    });
+
+    // 点击模态框外部关闭
+    document.getElementById('ollamaInstallModal').addEventListener('click', (e) => {
+      if (e.target.id === 'ollamaInstallModal') {
+        closeOllamaInstallModal();
+      }
+    });
+
+    // 启动 Ollama
+    document.getElementById('btnStartOllama').addEventListener('click', async () => {
+      showOllamaMessage('正在启动 Ollama 服务...', 'info');
+      try {
+        const res = await fetch('/api/ollama/start', { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+          showOllamaMessage(data.message, 'success');
+          setTimeout(() => checkOllamaStatus(), 3000);
+        } else {
+          showOllamaMessage('启动失败: ' + data.message, 'error');
+        }
+      } catch (err) {
+        showOllamaMessage('启动失败: ' + err.message, 'error');
+      }
+    });
+
+    // 停止 Ollama
+    document.getElementById('btnStopOllama').addEventListener('click', async () => {
+      if (!confirm('确定要停止 Ollama 服务吗？')) return;
+      showOllamaMessage('正在停止 Ollama 服务...', 'info');
+      try {
+        const res = await fetch('/api/ollama/stop', { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+          showOllamaMessage(data.message, 'success');
+          setTimeout(() => checkOllamaStatus(), 2000);
+        } else {
+          showOllamaMessage('停止失败: ' + data.message, 'error');
+        }
+      } catch (err) {
+        showOllamaMessage('停止失败: ' + err.message, 'error');
+      }
+    });
+
+    // 下载模型
+    document.getElementById('btnDownloadModel').addEventListener('click', async () => {
+      showOllamaMessage('正在下载模型 llama3.2:3b，这可能需要几分钟...', 'info');
+      try {
+        const res = await fetch('/api/ollama/download-model', { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+          showOllamaMessage(data.message, 'success');
+          setTimeout(() => checkOllamaStatus(), 2000);
+        } else {
+          showOllamaMessage('下载失败: ' + data.message, 'error');
+        }
+      } catch (err) {
+        showOllamaMessage('下载失败: ' + err.message, 'error');
+      }
+    });
+
+    // 页面加载时检查 Ollama 状态
+    checkOllamaStatus();
+    // 每 30 秒自动刷新状态
+    setInterval(checkOllamaStatus, 30000);
+
+    // 扫描功能 - 使用 SSE 实时流式传输
+    document.getElementById('scanBtn').addEventListener('click', () => {
+      const statusEl = document.getElementById('status');
+      const progressContainer = document.getElementById('progressContainer');
+      const progressBar = document.getElementById('progressBar');
+      const progressText = document.getElementById('progressText');
+      const progressDetail = document.getElementById('progressDetail');
+      const scanBtn = document.getElementById('scanBtn');
+
+      statusEl.textContent = '扫描中...';
+      progressContainer.style.display = 'block';
+      progressBar.style.width = '0%';
+      progressText.textContent = '0%';
+      progressDetail.textContent = '正在初始化扫描...';
+      scanBtn.disabled = true;
+
+      // 重置扫描数据
+      scanData = [];
+      selectedSkill = null;
+      document.getElementById('detailsContent').innerHTML = '<div class="details-empty">点击左侧 Skill 查看详细风险信息</div>';
+
+      // 使用 EventSource 接收实时数据
+      const eventSource = new EventSource('/api/scan-stream');
+
+      eventSource.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+
+        if (message.type === 'progress') {
+          // 更新进度条
+          const progress = message.data;
+          progressBar.style.width = progress.percentage + '%';
+          progressText.textContent = progress.percentage + '%';
+          progressDetail.textContent = `正在扫描: ${progress.skillName} (${progress.current}/${progress.total})`;
+        } else if (message.type === 'skill') {
+          // 收到一个 skill 的扫描结果，立即添加并渲染
+          scanData.push(message.data);
+          renderSkillTable();
+        } else if (message.type === 'complete') {
+          // 扫描完成
+          const stats = message.data;
+          progressBar.style.width = '100%';
+          progressText.textContent = '100%';
+          progressDetail.textContent = '扫描完成！';
+          statusEl.textContent = `扫描完成 (${new Date(stats.scannedAt).toLocaleString()})`;
+
+          // 更新统计信息
+          document.getElementById('totalSkills').textContent = stats.total;
+          document.getElementById('highRiskCount').textContent = stats.risky;
+          document.getElementById('mediumRiskCount').textContent = scanData.filter(s => {
+            const highCount = s.findings.filter(f => f.severity === 'high').length;
+            const mediumCount = s.findings.filter(f => f.severity === 'medium').length;
+            return mediumCount > 0 && highCount === 0;
+          }).length;
+          document.getElementById('safeCount').textContent = stats.safe;
+
+          // 调试：输出所有高危 Skill
+          const highRiskSkills = scanData.filter(s => s.findings.filter(f => f.severity === 'high').length > 0);
+          console.log('高危 Skills 列表:', highRiskSkills.map(s => ({
+            name: s.skillName,
+            highCount: s.findings.filter(f => f.severity === 'high').length,
+            findings: s.findings.filter(f => f.severity === 'high')
+          })));
+
+          // 3秒后隐藏进度条
+          setTimeout(() => {
+            progressContainer.style.display = 'none';
+          }, 3000);
+
+          eventSource.close();
+          scanBtn.disabled = false;
+        } else if (message.type === 'error') {
+          // 扫描出错
+          statusEl.textContent = '扫描失败: ' + message.error;
+          progressDetail.textContent = '扫描失败: ' + message.error;
+          eventSource.close();
+          scanBtn.disabled = false;
+        }
+      };
+
+      eventSource.onerror = (err) => {
+        console.error('SSE 连接错误:', err);
+        statusEl.textContent = '扫描失败: 连接中断';
+        progressDetail.textContent = '扫描失败: 连接中断';
+        eventSource.close();
+        scanBtn.disabled = false;
+      };
+    });
+
+    function updateStats(stats, summary) {
+      document.getElementById('totalSkills').textContent = stats.total;
+      document.getElementById('highRiskCount').textContent = summary.filter(s => s.highCount > 0).length;
+      document.getElementById('mediumRiskCount').textContent = summary.filter(s => s.mediumCount > 0 && s.highCount === 0).length;
+      document.getElementById('safeCount').textContent = stats.safe;
+    }
+
+    function renderSkillTable() {
+      const tbody = document.getElementById('skillTableBody');
+      const filterHigh = document.getElementById('filterHigh').checked;
+      const filterMedium = document.getElementById('filterMedium').checked;
+      const filterSafe = document.getElementById('filterSafe').checked;
+      const sortBy = document.getElementById('sortSelect').value;
+
+      if (!scanData || scanData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">未发现任何 Skill</td></tr>';
+        return;
+      }
+
+      let filtered = scanData.filter(skill => {
+        const highCount = skill.findings.filter(f => f.severity === 'high').length;
+        const mediumCount = skill.findings.filter(f => f.severity === 'medium').length;
+        const isSafe = skill.findings.length === 0;
+
+        if (highCount > 0 && filterHigh) return true;
+        if (mediumCount > 0 && highCount === 0 && filterMedium) return true;
+        if (isSafe && filterSafe) return true;
+        return false;
+      });
+
+      if (sortBy === 'risk') {
+        filtered.sort((a, b) => {
+          const aHigh = a.findings.filter(f => f.severity === 'high').length;
+          const bHigh = b.findings.filter(f => f.severity === 'high').length;
+          if (aHigh !== bHigh) return bHigh - aHigh;
+
+          const aMed = a.findings.filter(f => f.severity === 'medium').length;
+          const bMed = b.findings.filter(f => f.severity === 'medium').length;
+          return bMed - aMed;
+        });
+      } else {
+        filtered.sort((a, b) => a.skillName.localeCompare(b.skillName));
+      }
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">无符合条件的 Skill</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(skill => {
+        const highCount = skill.findings.filter(f => f.severity === 'high').length;
+        const mediumCount = skill.findings.filter(f => f.severity === 'medium').length;
+        const isSafe = skill.findings.length === 0;
+
+        return `
+          <tr onclick="window.selectSkill('${skill.skillName}')" ${selectedSkill === skill.skillName ? 'class="selected"' : ''}>
+            <td>${skill.skillName}</td>
+            <td>${highCount > 0 ? '<span class="risk-dot high"></span>' + highCount : '-'}</td>
+            <td>${mediumCount > 0 ? '<span class="risk-dot medium"></span>' + mediumCount : '-'}</td>
+            <td>
+              ${isSafe ? '<span style="color: var(--success); font-size: 12px; font-weight: 600;">✓ 安全</span>' : `
+                <button class="btn-ghost danger" onclick="event.stopPropagation(); quarantineSkill('${skill.skillName}')">隔离</button>
+                <button class="btn-ghost warn" onclick="event.stopPropagation(); disableSkill('${skill.skillName}')">禁用</button>
+              `}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function selectSkill(skillName) {
+      // 只有在切换到不同的 skill 时才重置展开状态
+      if (selectedSkill !== skillName) {
+        showAllMedium = false;
+      }
+      selectedSkill = skillName;
+      renderSkillTable();
+
+      const skill = scanData.find(s => s.skillName === skillName);
+      if (!skill) return;
+
+      const highFindings = skill.findings.filter(f => f.severity === 'high');
+      const mediumFindings = skill.findings.filter(f => f.severity === 'medium');
+
+      // 如果是安全的 skill，显示安全信息
+      if (skill.findings.length === 0) {
+        document.getElementById('detailsContent').innerHTML = `
+          <div style="text-align: center; padding: 40px 20px;">
+            <div style="font-size: 48px; margin-bottom: 16px;">✓</div>
+            <h3 style="margin: 0 0 8px 0; color: var(--success);">${skill.skillName}</h3>
+            <p style="font-size: 14px; color: var(--text-muted); margin: 0 0 8px 0;">${skill.skillDir}</p>
+            <p style="font-size: 16px; color: var(--success); font-weight: 600; margin: 16px 0 0 0;">该 Skill 未发现安全风险</p>
+            <p style="font-size: 13px; color: var(--text-muted); margin: 8px 0 0 0;">已通过所有安全检查</p>
+          </div>
+        `;
+        return;
+      }
+
+      // 获取 skills 根目录（skillDir 的父目录）
+      const skillsRoot = skill.skillDir.substring(0, skill.skillDir.lastIndexOf('\\'));
+
+      let htmlContent = `
+        <div>
+          <h3 style="margin: 0 0 8px 0;">${skill.skillName}</h3>
+          <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 12px 0;">${skill.skillDir}</p>
+
+          <div class="section-title">高危问题 (${highFindings.length})</div>
+      `;
+
+      if (highFindings.length === 0) {
+        htmlContent += '<p style="font-size: 12px; color: var(--text-muted);">无高危问题</p>';
+      } else {
+        highFindings.forEach(f => {
+          const fullPath = (skillsRoot + '\\' + f.file).replace(/\\/g, '\\\\');
+          htmlContent += `
+            <div class="finding" onclick="openFile('${fullPath}', ${f.line})">
+              <div class="finding-header">
+                <span class="finding-title"><span class="badge badge-high">高危</span> ${f.ruleId}</span>
+              </div>
+              <div class="finding-why">${f.description}</div>
+              <div class="finding-meta">位置: ${f.file}:${f.line}</div>
+              <div class="code-snippet">${escapeHtml(f.snippet)}</div>
+              ${f.remediation ? `<div class="remediation">💡 ${f.remediation}</div>` : ''}
+            </div>
+          `;
+        });
+      }
+
+      htmlContent += `<div class="section-title">中危问题 (${mediumFindings.length})</div>`;
+
+      if (mediumFindings.length === 0) {
+        htmlContent += '<p style="font-size: 12px; color: var(--text-muted);">无中危问题</p>';
+      } else {
+        const displayCount = showAllMedium ? mediumFindings.length : Math.min(5, mediumFindings.length);
+        mediumFindings.slice(0, displayCount).forEach(f => {
+          const fullPath = (skillsRoot + '\\' + f.file).replace(/\\/g, '\\\\');
+          htmlContent += `
+            <div class="finding" onclick="openFile('${fullPath}', ${f.line})">
+              <div class="finding-header">
+                <span class="finding-title"><span class="badge badge-medium">中危</span> ${f.ruleId}</span>
+              </div>
+              <div class="finding-why">${f.description}</div>
+              <div class="finding-meta">位置: ${f.file}:${f.line}</div>
+              ${f.remediation ? `<div class="remediation">💡 ${f.remediation}</div>` : ''}
+            </div>
+          `;
+        });
+        if (mediumFindings.length > 5) {
+          if (showAllMedium) {
+            htmlContent += `<button class="btn-ghost" onclick="window.toggleMediumFindings()" style="width: 100%; margin-top: 8px;">收起中危问题</button>`;
+          } else {
+            htmlContent += `<button class="btn-ghost" onclick="window.toggleMediumFindings()" style="width: 100%; margin-top: 8px;">查看全部 ${mediumFindings.length} 条中危问题</button>`;
+          }
+        }
+      }
+
+      htmlContent += '</div>';
+      const detailsContent = document.getElementById('detailsContent');
+      detailsContent.innerHTML = htmlContent;
+      detailsContent.classList.remove('details-empty');
+    }
+
+    window.selectSkill = selectSkill;
+
+    window.toggleMediumFindings = function() {
+      console.log('toggleMediumFindings called, showAllMedium:', showAllMedium, 'selectedSkill:', selectedSkill);
+      showAllMedium = !showAllMedium;
+      selectSkill(selectedSkill);
+    }
+
+    async function openFile(filePath, line) {
+      try {
+        const res = await fetch('/api/open-file', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filePath })
+        });
+        const data = await res.json();
+        if (!data.ok) {
+          alert(`打开文件失败: ${data.error}`);
+          return;
+        }
+        showCodeModal(data.filePath, data.content, line);
+      } catch (err) {
+        console.error('打开文件失败:', err);
+        alert('打开文件失败');
+      }
+    }
+    window.openFile = openFile;
+
+    function showCodeModal(filePath, content, highlightLine) {
+      const modal = document.getElementById('codeModal');
+      const fileName = document.getElementById('modalFileName');
+      const viewer = document.getElementById('codeViewer');
+
+      // 设置文件名
+      fileName.textContent = filePath;
+
+      // 渲染代码
+      const lines = content.split('\n');
+      viewer.innerHTML = lines.map((line, index) => {
+        const lineNum = index + 1;
+        const isHighlight = lineNum === highlightLine;
+        return `
+          <div class="code-line ${isHighlight ? 'highlight' : ''}" id="line-${lineNum}">
+            <span class="line-number">${lineNum}</span>
+            <span class="line-content">${escapeHtml(line)}</span>
+          </div>
+        `;
+      }).join('');
+
+      // 显示弹窗
+      modal.classList.add('active');
+
+      // 滚动到高亮行
+      if (highlightLine) {
+        setTimeout(() => {
+          const highlightEl = document.getElementById(`line-${highlightLine}`);
+          if (highlightEl) {
+            highlightEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
+      }
+    }
+
+    function closeCodeModal() {
+      const modal = document.getElementById('codeModal');
+      modal.classList.remove('active');
+    }
+    window.closeCodeModal = closeCodeModal;
+
+    async function quarantineSkill(skillName) {
+      if (!confirm(`确定要隔离 Skill "${skillName}" 吗？`)) return;
+
+      try {
+        const res = await fetch('/api/quarantine', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ skillName })
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+          alert(`已隔离 ${skillName} 到 ${data.movedTo}`);
+          document.getElementById('scanBtn').click();
+        } else {
+          alert('隔离失败: ' + data.error);
+        }
+      } catch (err) {
+        alert('隔离失败: ' + err.message);
+      }
+    }
+
+    async function disableSkill(skillName) {
+      if (!confirm(`确定要禁用 Skill "${skillName}" 吗？`)) return;
+
+      try {
+        const res = await fetch('/api/disable', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ skillName })
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+          alert(`已禁用 ${skillName}`);
+          document.getElementById('scanBtn').click();
+        } else {
+          alert('禁用失败: ' + data.error);
+        }
+      } catch (err) {
+        alert('禁用失败: ' + err.message);
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+      document.getElementById('filterHigh').addEventListener('change', renderSkillTable);
+      document.getElementById('filterMedium').addEventListener('change', renderSkillTable);
+      document.getElementById('filterSafe').addEventListener('change', renderSkillTable);
+      document.getElementById('sortSelect').addEventListener('change', renderSkillTable);
+    }); // 结束 DOMContentLoaded
+  </script>
+
+  <!-- 代码查看器弹窗 -->
+  <div id="codeModal" class="modal-overlay" onclick="if(event.target === this) closeCodeModal()">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title" id="modalFileName"></div>
+        <button class="modal-close" onclick="closeCodeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="code-viewer" id="codeViewer"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ollama 安装指引模态框 -->
+  <div id="ollamaInstallModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <span style="font-size: 24px;">📥</span>
+          安装 Ollama
+        </h3>
+      </div>
+      <div class="modal-body">
+        <p class="modal-text">
+          Ollama 需要手动安装。请按照以下步骤操作：
+        </p>
+        <div class="modal-steps">
+          <div class="modal-step">
+            <div class="modal-step-number">1</div>
+            <div>访问 Ollama 官方网站下载页面</div>
+          </div>
+          <div class="modal-step">
+            <div class="modal-step-number">2</div>
+            <div>下载 Windows 安装程序（OllamaSetup.exe）</div>
+          </div>
+          <div class="modal-step">
+            <div class="modal-step-number">3</div>
+            <div>运行安装程序并按照向导完成安装</div>
+          </div>
+          <div class="modal-step">
+            <div class="modal-step-number">4</div>
+            <div>安装完成后，返回此页面并刷新</div>
+          </div>
+        </div>
+        <p class="modal-text" style="font-size: 13px; color: var(--text-muted);">
+          💡 提示：安装完成后，点击"启动 Ollama"按钮即可使用 LLM 增强功能
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn-secondary" onclick="closeOllamaInstallModal()">
+          取消
+        </button>
+        <button class="modal-btn modal-btn-primary" onclick="openOllamaDownload()">
+          打开下载页面
+        </button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
